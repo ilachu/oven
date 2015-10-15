@@ -1,5 +1,5 @@
 var fs = require('fs');
-var forEach = require('forEach');
+var forEach = require('async-foreach').forEach;
 
 String.prototype.supplant = function (o) {
    	return this.replace(/#([^{}]*)#/g,
@@ -11,9 +11,9 @@ String.prototype.supplant = function (o) {
 };
 
 function recursiveSupplant(layout,html,vars,callback){
-	layout.supplant(html);
-	layout.supplant(vars);
-	if (layout.match(/#([^{}]*)#/) {
+	layout = layout.supplant(html);
+	layout = layout.supplant(vars);
+	if (layout.match(/#([^{}]*)#/)) {
 		recursiveSupplant(layout,html,vars,callback);
 	}
 	else{
@@ -25,7 +25,7 @@ function readHtml(layout,html,vars,callback){
 	forEach(htmlFilePaths,function(item,index,array){
 		fs.readFile(html[item],function(err,data){
 			if(err){
-				console.log(err);
+				callback(err);
 			}
 			else{
 				html[item] = data.toString();
@@ -43,14 +43,19 @@ module.exports = function (html,vars,callback){
 		}
 		else{
 			delete html.layout;
-			readHtml(layout.toString(),html,vars,function(err,view){
-				if (err) {
-					callback(err);
-				}
-				else{
-					return (null,view);
-				}
-			});
+			if (Object.keys(html).length == 0) {
+				callback(null,data.toString().supplant(vars));
+			}
+			else{
+				readHtml(data.toString(),html,vars,function(err,view){
+					if (err) {
+						callback(err);
+					}
+					else{
+						callback(null,view);
+					}
+				});
+			}
 		}
 	});
 };
