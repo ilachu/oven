@@ -44,7 +44,7 @@ module.exports = function (html,vars,callback){
 		else{
 			delete html.layout;
 			if (Object.keys(html).length == 0) {
-				callback(null,data.toString().supplant(vars));
+				return callback(null,data.toString().supplant(vars));
 			}
 			else{
 				readHtml(data.toString(),html,vars,function(err,view){
@@ -52,7 +52,7 @@ module.exports = function (html,vars,callback){
 						callback(err);
 					}
 					else{
-						callback(null,view);
+						return callback(null,view);
 					}
 				});
 			}
