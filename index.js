@@ -36,26 +36,32 @@ function readHtml(layout,html,vars,callback){
 		});
 	});
 };
-module.exports = function (html,vars,callback){
+function render(html,vars){
 	fs.readFile(html.layout,function (err,data){
 		if (err) {
-			return callback(err);
+			next(err);
 		}
 		else{
 			delete html.layout;
 			if (Object.keys(html).length == 0) {
-				return callback(null,data.toString().supplant(vars));
+				response.send(data.toString().supplant(vars));
 			}
 			else{
 				readHtml(data.toString(),html,vars,function(err,view){
 					if (err) {
-						callback(err);
+						next(err);
 					}
 					else{
-						return callback(null,view);
+						response.send(view);
 					}
 				});
 			}
 		}
 	});
 };
+
+module.exports = function (req,res,next){
+	response = res;
+	res.render = render;
+	next();
+}
